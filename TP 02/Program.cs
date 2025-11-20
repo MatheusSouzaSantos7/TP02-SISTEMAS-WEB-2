@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System; // Matheus Angelo de Souza Santos
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,12 +30,11 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
-// Fixed path to a file inside the web project so it can be edited directly
 var csvPath = Path.Combine(builder.Environment.ContentRootPath, "data", "book.csv");
 Directory.CreateDirectory(Path.GetDirectoryName(csvPath)!);
 
 var repo = new CsvBookRepository(csvPath);
-// If file does not exist, create using sample book
+
 if (!File.Exists(csvPath))
 {
     var sampleAuthors = new List<Author>
@@ -49,7 +48,6 @@ if (!File.Exists(csvPath))
 
 Book? bookFromCsv = repo.Load();
 
-// Minimal endpoints for /livro routes using loaded book
 app.MapGet("/livro/Name", () => bookFromCsv?.GetName() ?? "(no book)");
 app.MapGet("/livro/ToString", () => bookFromCsv?.ToString() ?? "(no book)");
 app.MapGet("/livro/GetAuthorNames", () => bookFromCsv?.GetAuthorNames() ?? "(no book)");
@@ -61,7 +59,6 @@ app.MapGet("/livro/ApresentarLivro", () =>
     return Results.Content(html, "text/html");
 });
 
-// Test endpoint: demonstrates all Book methods and shows results as JSON
 app.MapGet("/livro/Test", () =>
 {
     var b = bookFromCsv ?? new Book("Sample Test Book", new List<Author> {
@@ -74,7 +71,6 @@ app.MapGet("/livro/Test", () =>
     var toString = b.ToString();
     var authorNames = b.GetAuthorNames();
 
-    // mutate using setters
     b.SetPrice(originalPrice + 5);
     b.SetQty(originalQty + 2);
 
@@ -94,14 +90,12 @@ app.MapGet("/livro/Test", () =>
     });
 });
 
-// Endpoint to reload CSV at runtime
 app.MapPost("/livro/reload", () =>
 {
     bookFromCsv = repo.Load();
     return bookFromCsv is null ? Results.NotFound("no file") : Results.Ok("reloaded");
 });
 
-// Endpoint to save posted Book JSON to CSV
 app.MapPost("/livro/save", (Book updated) =>
 {
     repo.Save(updated);
